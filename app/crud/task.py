@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from app import schemas
 from models.task import Task
-from schemas.task import TaskCreate
+from schemas.task import TaskCreate, TaskUpdate
 
 def get_task(db: Session, task_id: UUID):
     """Функция ддля получения одной задачи"""
@@ -21,5 +21,33 @@ def create_task(db:Session, task: TaskCreate):
     db.commit()
     #обновление объекта
     db.refresh(db_task)
+    return db_task
+
+def update_task(db: Session, task_id: UUID, task_update: TaskUpdate):
+    """Функция для обновления задачи"""
+    #Ищу задачу, которую нужно обновить
+    db_task = get_task(db, task_id)
+    if db_task:
+        update_data = task_update.dict()
+
+        for field, value in update_data.items():
+            #устанавливаем новое значение атрибуту объекта
+            setattr(db_task, field, value)
+
+        db.add(db_task)
+        db.commit()
+        db.refresh(db_task)
+
+    return db_task
+
+def delete_task(db: Session, task_id: UUID):
+    """Функция удаления задачи"""
+    #Нахожу задачу
+    db_task = get_task(db, task_id)
+    if db_task:
+        db.delete(db_task)
+        db.commit()
+
+    # Возвращаем удаленный объект (или None, если не нашли)
     return db_task
 
