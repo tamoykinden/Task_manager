@@ -2,10 +2,7 @@ from sqlalchemy import Column, String, Text, Enum
 from sqlalchemy.dialects.postgresql import UUID
 import enum
 import uuid
-
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
+from app.database import Base
 
 class TaskStatus(enum.Enum):
     """Перечисление статусов задачи"""
