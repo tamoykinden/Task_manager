@@ -8,7 +8,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 class TaskService:
-    """Сервис для работы с задачами (объединяет все CRUD операции)"""
+    """Сервис для работы с задачами"""
     
     def __init__(self, db: Session):
         self.db = db
@@ -26,7 +26,7 @@ class TaskService:
         try:
             return self.db.query(Task).offset(skip).limit(limit).all()
         except SQLAlchemyError as e:
-            logger.error(f"Error getting tasks list (skip={skip}, limit={limit}): {str(e)}")
+            logger.error(f"Error getting tasks list: {str(e)}")
             raise
     
     def create_task(self, task: TaskCreate) -> Task:
@@ -36,7 +36,6 @@ class TaskService:
             self.db.add(db_task)
             self.db.commit()
             self.db.refresh(db_task)
-            logger.info(f"Task created successfully: {db_task.id}")
             return db_task
         except SQLAlchemyError as e:
             self.db.rollback()
@@ -53,7 +52,6 @@ class TaskService:
                     setattr(db_task, field, value)
                 self.db.commit()
                 self.db.refresh(db_task)
-                logger.info(f"Task updated successfully: {task_id}")
             return db_task
         except SQLAlchemyError as e:
             self.db.rollback()
@@ -67,7 +65,6 @@ class TaskService:
             if db_task:
                 self.db.delete(db_task)
                 self.db.commit()
-                logger.info(f"Task deleted successfully: {task_id}")
             return db_task
         except SQLAlchemyError as e:
             self.db.rollback()

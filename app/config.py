@@ -5,3 +5,4 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DSN = os.getenv('DSN')
+TEST_DSN = os.getenv('TEST_DSN')

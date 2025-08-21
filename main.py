@@ -4,9 +4,30 @@ from app.database import engine, Base
 
 
 app = FastAPI(
-    title='Task Manager API',
-    description='API для управления задачами с CRUD операциями',
-    version='1.0.0'
+    title="Task Manager API",
+    description="""
+    API для управления задачами
+    
+    Возможности:
+    -  Создание задач
+    - Получение списка задач
+    - Получение задачи по ID  
+    - Обновление задач
+    - Удаление задач
+    
+    Статусы задач:
+    - created - создана
+    - in_progress - в работе
+    - completed - завершена
+    """,
+    version="1.0.0",
+    contact={
+        "name": "Ваше имя",
+        "email": "ваш.email@example.com",
+    },
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json"
 )
 
 app.include_router(router, prefix='/tasks')
