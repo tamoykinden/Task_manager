@@ -16,6 +16,6 @@ class Task(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String(100), nullable=False)
-    description = Column(Text, max_length=1000,nullable=False)
+    description = Column(Text, nullable=False)
     status = Column(Enum(TaskStatus), default=TaskStatus.created)
 

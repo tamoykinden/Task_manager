@@ -1,8 +1,7 @@
 from sqlalchemy.orm import Session
 from uuid import UUID
-from app import schemas
-from models.task import Task
-from schemas.task import TaskCreate, TaskUpdate
+from app.models.task import Task
+from app.schemas.task import TaskCreate, TaskUpdate
 
 def get_task(db: Session, task_id: UUID):
     """Функция ддля получения одной задачи"""
@@ -15,7 +14,7 @@ def get_tasks(db:Session, skip: int=0, limit: int=100):
 def create_task(db:Session, task: TaskCreate):
     """Функция для создания задачи"""
     #распаковка словаря с данными
-    db_task = Task(**task.dict())
+    db_task = Task(**task.model_dump())
     #Добавляю объект в БД
     db.add(db_task)
     db.commit()
@@ -28,7 +27,7 @@ def update_task(db: Session, task_id: UUID, task_update: TaskUpdate):
     #Ищу задачу, которую нужно обновить
     db_task = get_task(db, task_id)
     if db_task:
-        update_data = task_update.dict()
+        update_data = task_update.model_dump(exclude_unset=True)
 
         for field, value in update_data.items():
             #устанавливаем новое значение атрибуту объекта
