@@ -1,8 +1,9 @@
-.gitignore
-.env
+__pycache__
 venv/
-__pycache__/
-.pytest_cache/
+.env
+.gitignore
 .coverage
+.pytest_cache
 Dockerfile
+docker-compose.yml
 README.md
