@@ -21,7 +21,25 @@ class TaskAPIRouter:
     def _register_routes(self):
         """Регистрация всех роутов"""
         
-        @self.router.post('/', response_model=Task, status_code=status.HTTP_201_CREATED)
+        @self.router.post(
+            '/', 
+            response_model = Task, 
+            status_code = status.HTTP_201_CREATED,
+            summary = 'Создать новую задачу',
+            description = """
+            Создает новую задачу в системе.
+        
+            Параметры:
+            - title: Название задачи (обязательное, 1-100 символов)
+            - description: Описание задачи (опциональное, до 1000 символов)
+            - status: Статус задачи (по умолчанию: "created")
+        
+            Доступные статусы:
+            - created - задача создана
+            - in_progress - задача в работе
+            - completed - задача завершена                
+            """
+        )
         def create_new_task(task: TaskCreate, db: Session = Depends(get_db)):
             """Создать новую задачу"""
             try:
@@ -30,17 +48,31 @@ class TaskAPIRouter:
             except SQLAlchemyError as e:
                 logger.error(f"Database error in create task: {str(e)}")
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Internal server error while creating task"
+                    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail = "Internal server error while creating task"
                 )
             except Exception as e:
                 logger.error(f"Unexpected error in create task: {str(e)}")
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Unexpected error occurred"
+                    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail = "Unexpected error occurred"
                 )
         
-        @self.router.get('/', response_model=List[Task])
+        @self.router.get(
+            '/', 
+            response_model = List[Task],
+            summary = 'Получить список задач',
+            description = """
+            Возвращает список задач с поддержкой пагинации.
+        
+            Параметры запроса:
+            - skip: Количество задач to skip (по умолчанию: 0)
+            - limit: Максимальное количество задач to return (по умолчанию: 100)
+        
+            Пример:
+            `GET /tasks/?skip=0&limit=10` - первые 10 задач
+            """
+        )
         def read_task_list(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
             """Получить список всех задач с пагинацией"""
             try:
@@ -50,17 +82,30 @@ class TaskAPIRouter:
             except SQLAlchemyError as e:
                 logger.error(f"Database error in get tasks list: {str(e)}")
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
                     detail="Internal server error while fetching tasks"
                 )
             except Exception as e:
                 logger.error(f"Unexpected error in get tasks list: {str(e)}")
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Unexpected error occurred"
+                    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail = "Unexpected error occurred"
                 )
         
-        @self.router.get("/{task_id}", response_model=Task)
+        @self.router.get(
+            "/{task_id}", 
+            response_model = Task,
+            summary= 'Получить задачу по UUID',
+            description = """
+            Возвращает задачу по указанному UUID.
+        
+            Параметры пути:
+            - task_id: UUID задачи
+            
+            Ошибки:
+            - 404 Not Found - если задача не найдена
+            """
+        )
         def read_one_task(task_id: UUID, db: Session = Depends(get_db)):
             """Получить задачу по UUID"""
             try:
@@ -69,8 +114,8 @@ class TaskAPIRouter:
                 
                 if db_task is None:
                     raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Task not found"
+                        status_code = status.HTTP_404_NOT_FOUND,
+                        detail = "Task not found"
                     )
                 return db_task
             except HTTPException:
@@ -85,11 +130,33 @@ class TaskAPIRouter:
             except Exception as e:
                 logger.error(f"Unexpected error in get task {task_id}: {str(e)}")
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Unexpected error occurred"
+                    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail = "Unexpected error occurred"
                 )
         
-        @self.router.patch("/{task_id}", response_model=Task)
+        @self.router.patch(
+            "/{task_id}", 
+            response_model = Task,
+            summary = 'Обновить задачу',
+            description = """
+            Частично обновляет данные задачи.
+        
+            Параметры пути:
+            - task_id: UUID задачи для обновления
+        
+            Тело запроса (опциональные поля):
+            - title: Новое название задачи
+            - description: Новое описание задачи
+            - status: Новый статус задачи
+        
+            Особенности:
+            - Обновляются только переданные поля
+            - Остальные поля остаются неизменными
+        
+            Ошибки:
+            - 404 Not Found - если задача не найдена
+            """
+        )
         def update_existing_task(task_id: UUID, task_update: TaskUpdate, db: Session = Depends(get_db)):
             """Обновить существующую задачу"""
             try:
@@ -98,8 +165,8 @@ class TaskAPIRouter:
                 
                 if db_task is None:
                     raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Task not found"
+                        status_code = status.HTTP_404_NOT_FOUND,
+                        detail = "Task not found"
                     )
                 return db_task
             except HTTPException:
@@ -113,21 +180,41 @@ class TaskAPIRouter:
             except Exception as e:
                 logger.error(f"Unexpected error in update task {task_id}: {str(e)}")
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Unexpected error occurred"
+                    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail = "Unexpected error occurred"
                 )
         
-        @self.router.delete("/{task_id}", response_model=Task)
+        @self.router.delete(
+            "/{task_id}", 
+            response_model=Task,
+            summary='Удалить задачу',
+            description="""
+            Удаляет задачу по указанному UUID.
+        
+            Параметры пути:
+            - task_id: UUID задачи для удаления
+        
+            Особенности:
+            - Задача полностью удаляется из системы
+            - Операция необратима
+        
+            Ошибки:
+            - 404 Not Found - если задача не найдена
+        
+            Возвращает:
+            Удаленную задачу (последнее состояние перед удалением).
+            """
+        )
         def delete_existing_task(task_id: UUID, db: Session = Depends(get_db)):
             """Удалить задачу"""
             try:
                 service = TaskService(db)
-                db_task = service.delete_task(task_id=task_id)
+                db_task = service.delete_task(task_id = task_id)
                 
                 if db_task is None:
                     raise HTTPException(
-                        status_code=status.HTTP_404_NOT_FOUND,
-                        detail="Task not found"
+                        status_code = status.HTTP_404_NOT_FOUND,
+                        detail = "Task not found"
                     )
                 return db_task
             except HTTPException:
@@ -135,14 +222,14 @@ class TaskAPIRouter:
             except SQLAlchemyError as e:
                 logger.error(f"Database error in delete task {task_id}: {str(e)}")
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Internal server error while deleting task"
+                    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail = "Internal server error while deleting task"
                 )
             except Exception as e:
                 logger.error(f"Unexpected error in delete task {task_id}: {str(e)}")
                 raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Unexpected error occurred"
+                    status_code = status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail = "Unexpected error occurred"
                 )
 
 
